@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE components PUBLIC "-//DBFLUTE//DTD LastaDi 1.0//EN"
+	"http://dbflute.org/meta/lastadi10.dtd">
+<components>
+	<component name="htmlThumbnailGenerator"
+		class="org.codelibs.fess.thumbnail.impl.HtmlTagBasedGenerator">
+		<property name="name">"htmlThumbnailGenerator"</property>
+		<property name="launchOptions">
+			<component
+				class="com.microsoft.playwright.BrowserType$LaunchOptions"
+				instance="prototype">
+				<property name="headless">true</property>
+			</component>
+		</property>
+		<postConstruct name="addCondition">
+			<arg>"mimetype"</arg>
+			<arg>"text/html"</arg>
+		</postConstruct>
+		<postConstruct name="register"></postConstruct>
+	</component>
+</components>
