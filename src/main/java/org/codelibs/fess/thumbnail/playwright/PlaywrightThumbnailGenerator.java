@@ -66,12 +66,18 @@ public class PlaywrightThumbnailGenerator extends BaseThumbnailGenerator {
 
     protected int closeTimeout = 15; // 15s
 
+    protected int viewportWidth = 960;
+
+    protected int viewportHeight = 960;
+
+    protected boolean loadFullPage = false;
+
     protected Tuple4<Playwright, Browser, BrowserContext, Page> worker;
 
     @PostConstruct
     public void init() {
         final String lastaEnv = System.getProperty("lasta.env");
-        if (Constants.EXECUTE_TYPE_THUMBNAIL.equals(lastaEnv)) {
+        if (!Constants.EXECUTE_TYPE_THUMBNAIL.equals(lastaEnv)) {
             if (logger.isDebugEnabled()) {
                 logger.debug("lasta.env is {}. PlaywrightThumbnailGenerator is disabled.", lastaEnv);
             }
@@ -95,6 +101,7 @@ public class PlaywrightThumbnailGenerator extends BaseThumbnailGenerator {
             browser = getBrowserType(playwright).launch(launchOptions);
             browserContext = browser.newContext(newContextOptions);
             page = browserContext.newPage();
+            page.setViewportSize(viewportWidth, viewportHeight);
             worker = new Tuple4<>(playwright, browser, browserContext, page);
             available = true;
         } catch (final Exception e) {
@@ -240,7 +247,7 @@ public class PlaywrightThumbnailGenerator extends BaseThumbnailGenerator {
     }
 
     protected ScreenshotOptions createScreenshotOptions(final File tempPngFile) {
-        return new Page.ScreenshotOptions().setFullPage(true).setPath(tempPngFile.toPath());
+        return new Page.ScreenshotOptions().setFullPage(loadFullPage).setPath(tempPngFile.toPath());
     }
 
     @Override
@@ -326,5 +333,17 @@ public class PlaywrightThumbnailGenerator extends BaseThumbnailGenerator {
 
     public void setNewContextOptions(final NewContextOptions newContextOptions) {
         this.newContextOptions = newContextOptions;
+    }
+
+    public void setViewportWidth(int viewportWidth) {
+        this.viewportWidth = viewportWidth;
+    }
+
+    public void setViewportHeight(int viewportHeight) {
+        this.viewportHeight = viewportHeight;
+    }
+
+    public void setLoadFullPage(boolean loadFullPage) {
+        this.loadFullPage = loadFullPage;
     }
 }
