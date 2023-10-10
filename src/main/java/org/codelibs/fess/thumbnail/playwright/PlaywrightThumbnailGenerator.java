@@ -184,7 +184,7 @@ public class PlaywrightThumbnailGenerator extends BaseThumbnailGenerator {
         });
     }
 
-    protected void createScreenshot(final String url, final int width, final int height, final File outputFile) {
+    protected synchronized void createScreenshot(final String url, final int width, final int height, final File outputFile) {
         final Page page = worker.getValue4();
         File tempPngFile = null;
         try {
