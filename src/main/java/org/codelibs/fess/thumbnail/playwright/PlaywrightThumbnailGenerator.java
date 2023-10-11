@@ -74,6 +74,10 @@ public class PlaywrightThumbnailGenerator extends BaseThumbnailGenerator {
 
     protected Tuple4<Playwright, Browser, BrowserContext, Page> worker;
 
+    protected Page.NavigateOptions navigateOptions;
+
+    protected double navigationTimeout = 30000;
+
     @PostConstruct
     public void init() {
         final String lastaEnv = System.getProperty("lasta.env");
@@ -92,6 +96,8 @@ public class PlaywrightThumbnailGenerator extends BaseThumbnailGenerator {
             logger.debug("Initiaizing Playwright...");
         }
 
+        updateProperties();
+
         Playwright playwright = null;
         Browser browser = null;
         BrowserContext browserContext = null;
@@ -103,6 +109,7 @@ public class PlaywrightThumbnailGenerator extends BaseThumbnailGenerator {
             page = browserContext.newPage();
             page.setViewportSize(viewportWidth, viewportHeight);
             worker = new Tuple4<>(playwright, browser, browserContext, page);
+            navigateOptions = new Page.NavigateOptions().setTimeout(navigationTimeout);
             available = true;
         } catch (final Exception e) {
             available = false;
@@ -111,6 +118,22 @@ public class PlaywrightThumbnailGenerator extends BaseThumbnailGenerator {
             }
             close(playwright, browser, browserContext, page);
             throw new CrawlerSystemException("Failed to create PlaywrightThumbnailGenerator.", e);
+        }
+    }
+
+    protected void updateProperties() {
+        final FessConfig fessConfig = ComponentUtil.getFessConfig();
+        final String viewportWidthStr = fessConfig.getSystemProperty("thumbnail.playwright.viewport.width");
+        if (viewportWidthStr != null) {
+            viewportWidth = Integer.valueOf(viewportWidthStr);
+        }
+        final String viewportHeightStr = fessConfig.getSystemProperty("thumbnail.playwright.viewport.height");
+        if (viewportHeightStr != null) {
+            viewportHeight = Integer.valueOf(viewportHeightStr);
+        }
+        final String navigationTimeoutStr = fessConfig.getSystemProperty("thumbnail.playwright.navigation.timeout");
+        if (navigationTimeoutStr != null) {
+            navigationTimeout = Double.valueOf(navigationTimeoutStr);
         }
     }
 
@@ -188,7 +211,7 @@ public class PlaywrightThumbnailGenerator extends BaseThumbnailGenerator {
         final Page page = worker.getValue4();
         File tempPngFile = null;
         try {
-            final Response response = page.navigate(url);
+            final Response response = page.navigate(url, navigateOptions);
             page.waitForLoadState(renderedState);
             if (logger.isDebugEnabled()) {
                 logger.debug("Loaded {} -> {}", url, response.url());

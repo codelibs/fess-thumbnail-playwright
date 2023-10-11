@@ -44,7 +44,11 @@ public class PlaywrightThumbnailGeneratorTest extends LastaFluteTestCase {
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        generator = new PlaywrightThumbnailGenerator();
+        generator = new PlaywrightThumbnailGenerator() {
+            @Override
+            protected void updateProperties() {
+            }
+        };
         final BrowserType.LaunchOptions launchOptions = new BrowserType.LaunchOptions();
         launchOptions.setHeadless(true);
         generator.addCondition("mimetype", "text/html");
