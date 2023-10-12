@@ -189,11 +189,10 @@ public class PlaywrightThumbnailGenerator extends BaseThumbnailGenerator {
                 createScreenshot(url, targetWidth, maxHeight, outputFile);
                 created = true;
             } catch (final Throwable t) {
+                logger.warn("Failed to create thumbnail: {} -> {} ({}:{})", thumbnailId, url, t.getClass().getCanonicalName(),
+                        t.getMessage());
                 if (logger.isDebugEnabled()) {
-                    logger.warn("Failed to create thumbnail: {} -> {}", thumbnailId, url, t);
-                } else {
-                    logger.warn("Failed to create thumbnail: {} -> {} ({}:{})", thumbnailId, url, t.getClass().getCanonicalName(),
-                            t.getMessage());
+                    logger.debug("Details for failed thumbnail creation.", t);
                 }
             } finally {
                 if (!created) {
