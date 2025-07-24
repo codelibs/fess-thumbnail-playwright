@@ -51,34 +51,62 @@ import com.microsoft.playwright.options.LoadState;
 
 import jakarta.annotation.PostConstruct;
 
+/**
+ * Thumbnail generator implementation using Microsoft Playwright for web page screenshot capture.
+ * This generator launches a browser instance, navigates to web pages, and captures screenshots
+ * that are then resized and cropped to generate thumbnails for search results.
+ */
 public class PlaywrightThumbnailGenerator extends BaseThumbnailGenerator {
 
     private static final Logger logger = LogManager.getLogger(PlaywrightThumbnailGenerator.class);
 
+    /**
+     * Default constructor for PlaywrightThumbnailGenerator.
+     */
+    public PlaywrightThumbnailGenerator() {
+        super();
+    }
+
+    /** Browser context options for Playwright. */
     protected NewContextOptions newContextOptions = new NewContextOptions();
 
+    /** The load state to wait for before taking screenshots. */
     protected LoadState renderedState = LoadState.NETWORKIDLE;
 
+    /** Environment options for Playwright initialization. */
     protected Map<String, String> options = new HashMap<>();
 
+    /** Browser launch options for Playwright. */
     protected LaunchOptions launchOptions;
 
+    /** The browser type to use (chromium, firefox, or webkit). */
     protected String browserName = "chromium";
 
+    /** Timeout in seconds for closing browser resources. */
     protected int closeTimeout = 15; // 15s
 
+    /** Browser viewport width in pixels. */
     protected int viewportWidth = 960;
 
+    /** Browser viewport height in pixels. */
     protected int viewportHeight = 960;
 
+    /** Whether to capture full page screenshots or just the viewport. */
     protected boolean loadFullPage = false;
 
+    /** The Playwright worker containing browser instances for screenshot generation. */
     protected Tuple4<Playwright, Browser, BrowserContext, Page> worker;
 
+    /** Navigation options for page loading. */
     protected Page.NavigateOptions navigateOptions;
 
+    /** Timeout in milliseconds for page navigation. */
     protected double navigationTimeout = 30000;
 
+    /**
+     * Initializes the Playwright thumbnail generator after dependency injection.
+     * Creates browser worker if running in thumbnail mode.
+     */
     @PostConstruct
     public void init() {
         final String lastaEnv = System.getProperty("lasta.env");
@@ -92,6 +120,10 @@ public class PlaywrightThumbnailGenerator extends BaseThumbnailGenerator {
         createWorker();
     }
 
+    /**
+     * Creates a new Playwright worker with browser, context and page instances.
+     * Sets up the browser environment for screenshot generation.
+     */
     protected void createWorker() {
         if (logger.isDebugEnabled()) {
             logger.debug("Initiaizing Playwright...");
@@ -122,6 +154,10 @@ public class PlaywrightThumbnailGenerator extends BaseThumbnailGenerator {
         }
     }
 
+    /**
+     * Updates configuration properties from system properties.
+     * Reads viewport dimensions and navigation timeout from Fess configuration.
+     */
     protected void updateProperties() {
         final FessConfig fessConfig = ComponentUtil.getFessConfig();
         final String viewportWidthStr = fessConfig.getSystemProperty("thumbnail.playwright.viewport.width");
@@ -138,6 +174,12 @@ public class PlaywrightThumbnailGenerator extends BaseThumbnailGenerator {
         }
     }
 
+    /**
+     * Gets the browser type based on the configured browser name.
+     *
+     * @param playwright the Playwright instance
+     * @return the browser type (chromium, firefox, or webkit)
+     */
     protected BrowserType getBrowserType(final Playwright playwright) {
         if (logger.isDebugEnabled()) {
             logger.debug("Create {}...", browserName);
@@ -207,6 +249,15 @@ public class PlaywrightThumbnailGenerator extends BaseThumbnailGenerator {
         });
     }
 
+    /**
+     * Creates a screenshot of the specified URL and resizes it to the target dimensions.
+     * This method is synchronized to ensure thread-safe access to the browser page.
+     *
+     * @param url the URL to capture
+     * @param width the target width for the thumbnail
+     * @param height the maximum height for the thumbnail
+     * @param outputFile the file to save the thumbnail to
+     */
     protected synchronized void createScreenshot(final String url, final int width, final int height, final File outputFile) {
         final Page page = worker.getValue4();
         File tempPngFile = null;
@@ -269,6 +320,12 @@ public class PlaywrightThumbnailGenerator extends BaseThumbnailGenerator {
         }
     }
 
+    /**
+     * Creates screenshot options for Playwright page capture.
+     *
+     * @param tempPngFile the temporary file to save the screenshot to
+     * @return configured screenshot options
+     */
     protected ScreenshotOptions createScreenshotOptions(final File tempPngFile) {
         return new Page.ScreenshotOptions().setFullPage(loadFullPage).setPath(tempPngFile.toPath());
     }
@@ -280,6 +337,15 @@ public class PlaywrightThumbnailGenerator extends BaseThumbnailGenerator {
         }
     }
 
+    /**
+     * Closes all Playwright resources in the proper order.
+     * Each resource is closed in a background thread with timeout protection.
+     *
+     * @param playwright the Playwright instance to close
+     * @param browser the Browser instance to close
+     * @param context the BrowserContext instance to close
+     * @param page the Page instance to close
+     */
     protected void close(final Playwright playwright, final Browser browser, final BrowserContext context, final Page page) {
         closeInBackground(() -> {
             if (page != null) {
@@ -315,6 +381,11 @@ public class PlaywrightThumbnailGenerator extends BaseThumbnailGenerator {
         });
     }
 
+    /**
+     * Executes a close operation in a background thread with timeout protection.
+     *
+     * @param closer the runnable that performs the close operation
+     */
     protected void closeInBackground(final Runnable closer) {
         final CountDownLatch latch = new CountDownLatch(1);
         try {
@@ -338,34 +409,74 @@ public class PlaywrightThumbnailGenerator extends BaseThumbnailGenerator {
         }
     }
 
+    /**
+     * Sets the browser launch options.
+     *
+     * @param launchOptions the launch options to set
+     */
     public void setLaunchOptions(final LaunchOptions launchOptions) {
         this.launchOptions = launchOptions;
     }
 
+    /**
+     * Sets the browser name to use for screenshot generation.
+     *
+     * @param browserName the browser name (chromium, firefox, or webkit)
+     */
     public void setBrowserName(final String browserName) {
         this.browserName = browserName;
     }
 
+    /**
+     * Sets the load state to wait for before taking screenshots.
+     *
+     * @param loadState the load state to wait for
+     */
     public void setRenderedState(final LoadState loadState) {
         this.renderedState = loadState;
     }
 
+    /**
+     * Sets the timeout for closing browser resources.
+     *
+     * @param closeTimeout the timeout in seconds
+     */
     public void setCloseTimeout(final int closeTimeout) {
         this.closeTimeout = closeTimeout;
     }
 
+    /**
+     * Sets the browser context options.
+     *
+     * @param newContextOptions the context options to set
+     */
     public void setNewContextOptions(final NewContextOptions newContextOptions) {
         this.newContextOptions = newContextOptions;
     }
 
+    /**
+     * Sets the browser viewport width.
+     *
+     * @param viewportWidth the viewport width in pixels
+     */
     public void setViewportWidth(int viewportWidth) {
         this.viewportWidth = viewportWidth;
     }
 
+    /**
+     * Sets the browser viewport height.
+     *
+     * @param viewportHeight the viewport height in pixels
+     */
     public void setViewportHeight(int viewportHeight) {
         this.viewportHeight = viewportHeight;
     }
 
+    /**
+     * Sets whether to capture full page screenshots or just the viewport.
+     *
+     * @param loadFullPage true to capture full page, false for viewport only
+     */
     public void setLoadFullPage(boolean loadFullPage) {
         this.loadFullPage = loadFullPage;
     }

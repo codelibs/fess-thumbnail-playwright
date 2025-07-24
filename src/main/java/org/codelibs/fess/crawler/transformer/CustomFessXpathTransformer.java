@@ -20,9 +20,21 @@ import org.apache.logging.log4j.Logger;
 import org.codelibs.fess.crawler.entity.ResponseData;
 import org.w3c.dom.Document;
 
+/**
+ * Custom XPath transformer for Fess that filters HTML content for thumbnail generation.
+ * This transformer only processes HTML content and skips other MIME types to optimize
+ * thumbnail generation performance.
+ */
 public class CustomFessXpathTransformer extends FessXpathTransformer {
 
     private static final Logger logger = LogManager.getLogger(CustomFessXpathTransformer.class);
+
+    /**
+     * Default constructor for CustomFessXpathTransformer.
+     */
+    public CustomFessXpathTransformer() {
+        super();
+    }
 
     @Override
     protected String getThumbnailUrl(final ResponseData responseData, final Document document) {
