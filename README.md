@@ -113,7 +113,7 @@ The plugin supports three browser engines:
 - **Background Resource Cleanup**: Non-blocking browser resource disposal
 - **Comprehensive Error Handling**: Robust error recovery and logging
 
-## 🧪 Testing
+## Testing
 
 The project includes comprehensive test coverage:
 
@@ -130,7 +130,7 @@ mvn test jacoco:report
 - **CustomFessXpathTransformer**: 8 test cases covering MIME type filtering and edge cases
 - **PlaywrightThumbnailGenerator**: 18 test cases covering browser management, screenshot generation, and configuration
 
-## 🤝 Contributing
+## Contributing
 
 We welcome contributions! Please follow these steps:
 
