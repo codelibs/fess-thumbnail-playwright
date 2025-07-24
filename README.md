@@ -30,7 +30,7 @@ A powerful thumbnail generation plugin for [Fess](https://fess.codelibs.org/) th
 
 2. Place the JAR file in your Fess plugins directory:
    ```bash
-   cp fess-thumbnail-playwright-*.jar $FESS_HOME/app/WEB-INF/lib/
+   cp fess-thumbnail-playwright-*.jar $FESS_HOME/app/WEB-INF/plugin/
    ```
 
 3. Restart Fess
@@ -46,7 +46,7 @@ cd fess-thumbnail-playwright
 mvn clean package
 
 # Copy the generated JAR to Fess
-cp target/fess-thumbnail-playwright-*.jar $FESS_HOME/app/WEB-INF/lib/
+cp target/fess-thumbnail-playwright-*.jar $FESS_HOME/app/WEB-INF/plugin/
 ```
 
 ## Configuration
