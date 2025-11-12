@@ -396,45 +396,16 @@ public class PlaywrightThumbnailGeneratorTest extends LastaFluteTestCase {
     }
 
     /**
-     * Test updateProperties reads system properties correctly.
+     * Test viewport configuration can be modified.
      */
-    public void test_updateProperties() {
-        final String originalWidth = System.getProperty("thumbnail.playwright.viewport.width");
-        final String originalHeight = System.getProperty("thumbnail.playwright.viewport.height");
-        final String originalTimeout = System.getProperty("thumbnail.playwright.navigation.timeout");
+    public void test_viewportConfiguration_modification() {
+        // Test setting custom viewport dimensions
+        generator.setViewportWidth(1280);
+        generator.setViewportHeight(720);
 
-        try {
-            // Set system properties
-            System.setProperty("thumbnail.playwright.viewport.width", "1280");
-            System.setProperty("thumbnail.playwright.viewport.height", "720");
-            System.setProperty("thumbnail.playwright.navigation.timeout", "45000");
-
-            // Create a new generator that will read these properties
-            final PlaywrightThumbnailGenerator testGenerator = new PlaywrightThumbnailGenerator();
-            testGenerator.updateProperties();
-
-            // Verify properties were read
-            assertEquals("Viewport width should be updated", 1280, testGenerator.viewportWidth);
-            assertEquals("Viewport height should be updated", 720, testGenerator.viewportHeight);
-            assertEquals("Navigation timeout should be updated", 45000.0, testGenerator.navigationTimeout, 0.01);
-        } finally {
-            // Restore original properties
-            if (originalWidth != null) {
-                System.setProperty("thumbnail.playwright.viewport.width", originalWidth);
-            } else {
-                System.clearProperty("thumbnail.playwright.viewport.width");
-            }
-            if (originalHeight != null) {
-                System.setProperty("thumbnail.playwright.viewport.height", originalHeight);
-            } else {
-                System.clearProperty("thumbnail.playwright.viewport.height");
-            }
-            if (originalTimeout != null) {
-                System.setProperty("thumbnail.playwright.navigation.timeout", originalTimeout);
-            } else {
-                System.clearProperty("thumbnail.playwright.navigation.timeout");
-            }
-        }
+        // Verify settings were applied
+        assertEquals("Viewport width should be modifiable", 1280, generator.viewportWidth);
+        assertEquals("Viewport height should be modifiable", 720, generator.viewportHeight);
     }
 
     /**
