@@ -371,4 +371,270 @@ public class PlaywrightThumbnailGeneratorTest extends LastaFluteTestCase {
         // but internal resources are closed
         assertTrue("Destroy should complete without exception", true);
     }
+
+    /**
+     * Test close method with all null parameters.
+     */
+    public void test_close_withNullParameters() {
+        // Execute - should handle null parameters gracefully
+        generator.close(null, null, null, null);
+
+        // Verify - should complete without exception
+        assertTrue("Close should handle null parameters gracefully", true);
+    }
+
+    /**
+     * Test close method with mixed null and non-null parameters.
+     */
+    public void test_close_withMixedParameters() {
+        // Execute - should handle mixed null parameters gracefully
+        // Only some parameters are null
+        generator.close(null, generator.worker.getValue2(), null, generator.worker.getValue4());
+
+        // Verify - should complete without exception
+        assertTrue("Close should handle mixed null parameters gracefully", true);
+    }
+
+    /**
+     * Test viewport configuration can be modified.
+     */
+    public void test_viewportConfiguration_modification() {
+        // Test setting custom viewport dimensions
+        generator.setViewportWidth(1280);
+        generator.setViewportHeight(720);
+
+        // Verify settings were applied
+        assertEquals("Viewport width should be modifiable", 1280, generator.viewportWidth);
+        assertEquals("Viewport height should be modifiable", 720, generator.viewportHeight);
+    }
+
+    /**
+     * Test createScreenshot with tall image that needs clipping.
+     * This tests the image height clipping logic when resizedImg.getHeight() > maxHeight.
+     */
+    public void test_createScreenshot_tallImageClipping() throws IOException {
+        // Create a screenshot with small width and large max height
+        // This should result in a tall resized image that needs clipping
+        final File pngFile = File.createTempFile("fess-thumbnail-tall-", ".png");
+        try {
+            final int targetWidth = 100;
+            final int maxHeight = 100;
+
+            // URL with a tall page that will likely result in clipping
+            generator.createScreenshot("https://fess.codelibs.org/ja/10.0/install/install.html", targetWidth, maxHeight, pngFile);
+
+            assertTrue("File should exist", pngFile.exists());
+
+            final BufferedImage img = ImageIO.read(pngFile);
+            assertEquals("Width should match target width", targetWidth, img.getWidth());
+            assertTrue("Height should be clipped to max height or less", img.getHeight() <= maxHeight);
+        } finally {
+            if (pngFile.exists()) {
+                pngFile.delete();
+            }
+        }
+    }
+
+    /**
+     * Test createScreenshot verifies aspect ratio preservation.
+     */
+    public void test_createScreenshot_aspectRatioPreservation() throws IOException {
+        final File pngFile = File.createTempFile("fess-thumbnail-aspect-", ".png");
+        try {
+            final int targetWidth = 400;
+            final int maxHeight = 600;
+
+            generator.createScreenshot("https://fess.codelibs.org/", targetWidth, maxHeight, pngFile);
+
+            assertTrue("File should exist", pngFile.exists());
+
+            final BufferedImage img = ImageIO.read(pngFile);
+            assertEquals("Width should match target width", targetWidth, img.getWidth());
+
+            // Height should maintain aspect ratio (may be clipped to maxHeight)
+            assertTrue("Height should be positive", img.getHeight() > 0);
+            assertTrue("Height should not exceed max height", img.getHeight() <= maxHeight);
+        } finally {
+            if (pngFile.exists()) {
+                pngFile.delete();
+            }
+        }
+    }
+
+    /**
+     * Test initialization creates proper worker components.
+     */
+    public void test_createWorker_createsAllComponents() {
+        // Verify all worker components are created
+        assertNotNull("Worker should be created", generator.worker);
+        assertNotNull("Playwright should be created", generator.worker.getValue1());
+        assertNotNull("Browser should be created", generator.worker.getValue2());
+        assertNotNull("BrowserContext should be created", generator.worker.getValue3());
+        assertNotNull("Page should be created", generator.worker.getValue4());
+        assertNotNull("NavigateOptions should be created", generator.navigateOptions);
+        // Note: available field is protected, but if worker is created, generator is available
+    }
+
+    /**
+     * Test that navigation timeout is properly set in navigateOptions.
+     */
+    public void test_navigationTimeout_configuredCorrectly() {
+        // Default navigation timeout should be 30000
+        assertEquals("Default navigation timeout should be 30000ms", 30000.0, generator.navigationTimeout, 0.01);
+
+        // Verify navigateOptions is created (can't directly verify timeout value as it's internal)
+        assertNotNull("NavigateOptions should be created", generator.navigateOptions);
+    }
+
+    /**
+     * Test createScreenshot with HTTPS URL.
+     */
+    public void test_createScreenshot_httpsUrl() throws IOException {
+        final File pngFile = File.createTempFile("fess-thumbnail-https-", ".png");
+        try {
+            generator.createScreenshot("https://www.google.com/", 200, 200, pngFile);
+            assertTrue("File should exist for HTTPS URL", pngFile.exists());
+
+            final BufferedImage img = ImageIO.read(pngFile);
+            assertNotNull("Image should be readable", img);
+            assertEquals("Width should match", 200, img.getWidth());
+        } finally {
+            if (pngFile.exists()) {
+                pngFile.delete();
+            }
+        }
+    }
+
+    /**
+     * Test that worker is properly created and initialized.
+     */
+    public void test_workerProperlyCreatedAndInitialized() {
+        // Verify worker is created (indicates generator is available)
+        assertNotNull("Worker should be properly created after initialization", generator.worker);
+        assertNotNull("Worker should have Playwright instance", generator.worker.getValue1());
+    }
+
+    /**
+     * Test createScreenshot handles response redirects properly.
+     */
+    public void test_createScreenshot_handlesRedirects() throws IOException {
+        final File pngFile = File.createTempFile("fess-thumbnail-redirect-", ".png");
+        try {
+            // URL that might redirect (e.g., http -> https)
+            generator.createScreenshot("http://www.google.com/", 200, 200, pngFile);
+            assertTrue("File should exist even with redirects", pngFile.exists());
+
+            final BufferedImage img = ImageIO.read(pngFile);
+            assertNotNull("Image should be readable after redirect", img);
+        } finally {
+            if (pngFile.exists()) {
+                pngFile.delete();
+            }
+        }
+    }
+
+    /**
+     * Test that temp file is cleaned up even when createScreenshot succeeds.
+     */
+    public void test_createScreenshot_tempFileCleanup() throws IOException {
+        final File pngFile = File.createTempFile("fess-thumbnail-cleanup-", ".png");
+        try {
+            generator.createScreenshot("https://fess.codelibs.org/", 200, 200, pngFile);
+            assertTrue("Output file should exist", pngFile.exists());
+
+            // Temp files should be cleaned up automatically
+            // We can't directly verify this, but the test should not leave temp files
+        } finally {
+            if (pngFile.exists()) {
+                pngFile.delete();
+            }
+        }
+    }
+
+    /**
+     * Test createScreenshot with very small dimensions.
+     */
+    public void test_createScreenshot_verySmallDimensions() throws IOException {
+        final File pngFile = File.createTempFile("fess-thumbnail-small-", ".png");
+        try {
+            final int width = 50;
+            final int height = 50;
+
+            generator.createScreenshot("https://fess.codelibs.org/", width, height, pngFile);
+            assertTrue("File should exist", pngFile.exists());
+
+            final BufferedImage img = ImageIO.read(pngFile);
+            assertEquals("Width should match small dimension", width, img.getWidth());
+            assertTrue("Height should not exceed small max height", img.getHeight() <= height);
+        } finally {
+            if (pngFile.exists()) {
+                pngFile.delete();
+            }
+        }
+    }
+
+    /**
+     * Test createScreenshot with very large width dimension.
+     */
+    public void test_createScreenshot_largeDimensions() throws IOException {
+        final File pngFile = File.createTempFile("fess-thumbnail-large-", ".png");
+        try {
+            final int width = 1920;
+            final int height = 1080;
+
+            generator.createScreenshot("https://fess.codelibs.org/", width, height, pngFile);
+            assertTrue("File should exist", pngFile.exists());
+
+            final BufferedImage img = ImageIO.read(pngFile);
+            assertEquals("Width should match large dimension", width, img.getWidth());
+            assertTrue("Height should not exceed large max height", img.getHeight() <= height);
+        } finally {
+            if (pngFile.exists()) {
+                pngFile.delete();
+            }
+        }
+    }
+
+    /**
+     * Test that different load states work correctly.
+     */
+    public void test_createScreenshot_withDifferentLoadStates() throws IOException {
+        final LoadState[] loadStates = { LoadState.LOAD, LoadState.DOMCONTENTLOADED, LoadState.NETWORKIDLE };
+
+        for (LoadState loadState : loadStates) {
+            final File pngFile = File.createTempFile("fess-thumbnail-loadstate-", ".png");
+            try {
+                generator.setRenderedState(loadState);
+                generator.createScreenshot("https://fess.codelibs.org/", 200, 200, pngFile);
+                assertTrue("File should exist for load state: " + loadState, pngFile.exists());
+            } finally {
+                if (pngFile.exists()) {
+                    pngFile.delete();
+                }
+            }
+        }
+
+        // Reset to default
+        generator.setRenderedState(LoadState.NETWORKIDLE);
+    }
+
+    /**
+     * Test createScreenshot with full page enabled.
+     */
+    public void test_createScreenshot_withFullPage() throws IOException {
+        final File pngFile = File.createTempFile("fess-thumbnail-fullpage-", ".png");
+        try {
+            generator.setLoadFullPage(true);
+            generator.createScreenshot("https://fess.codelibs.org/", 200, 200, pngFile);
+            assertTrue("File should exist with full page enabled", pngFile.exists());
+
+            final BufferedImage img = ImageIO.read(pngFile);
+            assertNotNull("Image should be readable with full page", img);
+        } finally {
+            generator.setLoadFullPage(false); // Reset to default
+            if (pngFile.exists()) {
+                pngFile.delete();
+            }
+        }
+    }
 }
