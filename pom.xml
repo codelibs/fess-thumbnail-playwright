@@ -1,14 +1,14 @@
 <?xml version="1.0"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<artifactId>fess-thumbnail-playwright</artifactId>
+	<artifactId>fess-thumbnail-example</artifactId>
 	<packaging>jar</packaging>
-	<name>Playwright Thumbnail Generator</name>
-	<version>15.1.1-SNAPSHOT</version>
+	<name>Fess Thumbnail Example</name>
+	<version>1.0.0-SNAPSHOT</version>
 	<scm>
-		<connection>scm:git:git@github.com:codelibs/fess-thumbnail-playwright.git</connection>
-		<developerConnection>scm:git:git@github.com:codelibs/fess-thumbnail-playwright.git</developerConnection>
-		<url>https://github.com/codelibs/fess-thumbnail-playwright</url>
+		<connection>scm:git:git@github.com:codelibs/fess-thumbnail-example.git</connection>
+		<developerConnection>scm:git:git@github.com:codelibs/fess-thumbnail-example.git</developerConnection>
+		<url>https://github.com/codelibs/fess-thumbnail-example</url>
 	  <tag>HEAD</tag>
   </scm>
 	<parent>
@@ -94,11 +94,6 @@
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 			<version>${slf4j.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.microsoft.playwright</groupId>
-			<artifactId>playwright</artifactId>
-			<version>${playwright.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>

@@ -1,20 +1,17 @@
-# Fess Thumbnail Playwright Plugin
+# Fess Thumbnail Example
 
-[![Java CI with Maven](https://github.com/codelibs/fess-thumbnail-playwright/actions/workflows/maven.yml/badge.svg)](https://github.com/codelibs/fess-thumbnail-playwright/actions/workflows/maven.yml)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/org.codelibs.fess/fess-thumbnail-playwright/badge.svg)](https://maven-badges.herokuapp.com/maven-central/org.codelibs.fess/fess-thumbnail-playwright)
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+This is an example project for creating custom thumbnail generators for [Fess](https://fess.codelibs.org/).
 
-A powerful thumbnail generation plugin for [Fess](https://fess.codelibs.org/) that uses Microsoft Playwright to capture high-quality screenshots of web pages for search result thumbnails.
+## Overview
+
+This project provides a template/base implementation for creating custom thumbnail generators. It demonstrates the basic structure and API for implementing thumbnail generation functionality that can be integrated into Fess.
 
 ## Features
 
-- **High-Quality Screenshots**: Generates accurate web page thumbnails using real browser rendering
-- **Multi-Browser Support**: Supports Chromium, Firefox, and WebKit engines
-- **Intelligent Content Filtering**: Only processes HTML content to optimize performance
-- **Configurable Viewport**: Customizable browser viewport dimensions for consistent thumbnail sizing
-- **Thread-Safe Operations**: Synchronized screenshot generation for reliable concurrent processing
-- **Flexible Image Processing**: Automatic resizing and cropping to fit specified dimensions while maintaining aspect ratio
-- **Resource Management**: Efficient browser resource management with timeout protection
+- **Template Implementation**: A working example of `BaseThumbnailGenerator` extension
+- **Clean Architecture**: Minimal dependencies focusing on core Fess integration
+- **Easy Customization**: Well-documented code with clear extension points
+- **Production Ready**: Includes proper configuration, testing, and packaging setup
 
 ## Requirements
 
@@ -22,162 +19,222 @@ A powerful thumbnail generation plugin for [Fess](https://fess.codelibs.org/) th
 - **Fess**: 15.0 or higher
 - **Maven**: 3.6 or higher (for building from source)
 
-## Installation
+## Project Structure
 
-### Method 1: Using Maven Central (Recommended)
+```
+fess-thumbnail-example/
+├── pom.xml                          # Maven configuration
+├── README.md                        # This file
+└── src/
+    ├── main/
+    │   ├── java/
+    │   │   └── org/
+    │   │       └── codelibs/
+    │   │           └── fess/
+    │   │               ├── thumbnail/
+    │   │               │   └── example/
+    │   │               │       └── ExampleThumbnailGenerator.java
+    │   │               └── crawler/
+    │   │                   └── transformer/
+    │   │                       └── CustomFessXpathTransformer.java
+    │   └── resources/
+    │       ├── fess_thumbnail+htmlThumbnailGenerator.xml
+    │       └── crawler/
+    │           └── transformer+fessXpathTransformer.xml
+    └── test/
+        └── java/
+            └── org/
+                └── codelibs/
+                    └── fess/
+                        ├── thumbnail/
+                        │   └── example/
+                        │       └── ExampleThumbnailGeneratorTest.java
+                        └── crawler/
+                            └── transformer/
+                                └── CustomFessXpathTransformerTest.java
+```
 
-1. Download the latest JAR from [Maven Central](https://repo1.maven.org/maven2/org/codelibs/fess/fess-thumbnail-playwright/)
-
-2. Place the JAR file in your Fess plugins directory:
-   ```bash
-   cp fess-thumbnail-playwright-*.jar $FESS_HOME/app/WEB-INF/plugin/
-   ```
-
-3. Restart Fess
-
-### Method 2: Build from Source
+## Building from Source
 
 ```bash
 # Clone the repository
-git clone https://github.com/codelibs/fess-thumbnail-playwright.git
-cd fess-thumbnail-playwright
+git clone https://github.com/codelibs/fess-thumbnail-example.git
+cd fess-thumbnail-example
 
 # Build the project
 mvn clean package
 
-# Copy the generated JAR to Fess
-cp target/fess-thumbnail-playwright-*.jar $FESS_HOME/app/WEB-INF/plugin/
+# The JAR file will be created in target/fess-thumbnail-example-*.jar
 ```
+
+## Creating Your Own Thumbnail Generator
+
+### 1. Use This Project as a Template
+
+Fork or copy this project as a starting point for your custom thumbnail generator.
+
+### 2. Implement Thumbnail Generation Logic
+
+Edit `src/main/java/org/codelibs/fess/thumbnail/example/ExampleThumbnailGenerator.java`:
+
+```java
+protected boolean createThumbnail(final String url, final int width,
+                                  final int height, final File outputFile) {
+    // Add your thumbnail generation logic here
+    // Examples:
+    // - Use Playwright/Selenium for browser screenshots
+    // - Use ImageMagick for image processing
+    // - Use wkhtmltoimage for HTML to image conversion
+    // - Implement custom rendering
+
+    return true; // Return true if successful
+}
+```
+
+### 3. Add Required Dependencies
+
+Update `pom.xml` to include any libraries you need:
+
+```xml
+<dependencies>
+    <!-- Example: Add Playwright for browser automation -->
+    <dependency>
+        <groupId>com.microsoft.playwright</groupId>
+        <artifactId>playwright</artifactId>
+        <version>1.42.0</version>
+    </dependency>
+
+    <!-- Add other dependencies as needed -->
+</dependencies>
+```
+
+### 4. Configure the Generator
+
+Update `src/main/resources/fess_thumbnail+htmlThumbnailGenerator.xml` to add custom properties:
+
+```xml
+<component name="htmlThumbnailGenerator"
+    class="org.codelibs.fess.thumbnail.example.ExampleThumbnailGenerator">
+    <property name="name">"htmlThumbnailGenerator"</property>
+
+    <!-- Add your custom properties -->
+    <property name="viewportWidth">1280</property>
+    <property name="viewportHeight">720</property>
+
+    <postConstruct name="addCondition">
+        <arg>"mimetype"</arg>
+        <arg>"text/html"</arg>
+    </postConstruct>
+    <postConstruct name="register"></postConstruct>
+</component>
+```
+
+### 5. Build and Deploy
+
+```bash
+# Build your custom thumbnail generator
+mvn clean package
+
+# Copy to Fess plugins directory
+cp target/fess-thumbnail-example-*.jar $FESS_HOME/app/WEB-INF/plugin/
+
+# Restart Fess
+```
+
+## Key Components
+
+### ExampleThumbnailGenerator
+
+The main thumbnail generator class that extends `BaseThumbnailGenerator`.
+
+**Key Methods:**
+- `init()`: Initialization logic, called after dependency injection
+- `generate()`: Main entry point for thumbnail generation
+- `createThumbnail()`: Actual thumbnail creation logic (implement this)
+- `destroy()`: Cleanup resources
+
+### CustomFessXpathTransformer
+
+Custom transformer for content filtering before thumbnail generation.
+
+**Features:**
+- Filters HTML content by MIME type
+- Optimizes performance by skipping non-HTML content
+- Customizable for specific content types
 
 ## Configuration
 
-The plugin supports the following system properties for customization:
-
-| Property | Description | Default Value |
-|----------|-------------|---------------|
-| `thumbnail.playwright.viewport.width` | Browser viewport width in pixels | `960` |
-| `thumbnail.playwright.viewport.height` | Browser viewport height in pixels | `960` |
-| `thumbnail.playwright.navigation.timeout` | Page load timeout in milliseconds | `30000` |
-
-### Example Configuration
-
-Add these properties to your Fess system configuration:
+The thumbnail generator can be configured through Fess system properties:
 
 ```properties
-# Set custom viewport dimensions
-thumbnail.playwright.viewport.width=1280
-thumbnail.playwright.viewport.height=720
-
-# Set navigation timeout to 45 seconds
-thumbnail.playwright.navigation.timeout=45000
+# Example configuration
+thumbnail.example.property=value
 ```
 
-## Usage
+Access configuration in your code:
 
-Once installed, the plugin automatically integrates with Fess's thumbnail generation system. No additional configuration is required for basic usage.
-
-### Browser Selection
-
-The plugin supports three browser engines:
-
-- **Chromium** (default): Best compatibility and performance
-- **Firefox**: Alternative rendering engine
-- **WebKit**: Safari-based rendering
-
-### Thumbnail Generation Process
-
-1. **Content Filtering**: Only HTML content (`text/html` MIME type) is processed
-2. **Browser Launch**: Creates a headless browser instance with configured settings
-3. **Page Navigation**: Loads the target URL with specified timeout
-4. **Screenshot Capture**: Takes a full-page or viewport screenshot
-5. **Image Processing**: Resizes and crops the image to fit thumbnail dimensions
-6. **Resource Cleanup**: Safely closes browser resources with timeout protection
-
-## Architecture
-
-### Core Components
-
-#### `PlaywrightThumbnailGenerator`
-- **Purpose**: Main thumbnail generation engine
-- **Features**: Browser management, screenshot capture, image processing
-- **Thread Safety**: Synchronized operations for concurrent access
-
-#### `CustomFessXpathTransformer`
-- **Purpose**: Content filtering for thumbnail generation
-- **Optimization**: Skips non-HTML content to improve performance
-
-### Key Features
-
-- **Singleton Browser Management**: Efficient resource utilization
-- **Configurable Load States**: Wait for different page load conditions
-- **Background Resource Cleanup**: Non-blocking browser resource disposal
-- **Comprehensive Error Handling**: Robust error recovery and logging
+```java
+final FessConfig fessConfig = ComponentUtil.getFessConfig();
+final String value = fessConfig.getSystemProperty("thumbnail.example.property");
+```
 
 ## Testing
 
-The project includes comprehensive test coverage:
+Run tests with Maven:
 
 ```bash
 # Run all tests
 mvn test
 
-# Run tests with coverage report
-mvn test jacoco:report
+# Run specific test
+mvn test -Dtest=ExampleThumbnailGeneratorTest
 ```
 
-### Test Coverage
+## Examples of Thumbnail Generators
 
-- **CustomFessXpathTransformer**: 8 test cases covering MIME type filtering and edge cases
-- **PlaywrightThumbnailGenerator**: 18 test cases covering browser management, screenshot generation, and configuration
+This template can be used to create various types of thumbnail generators:
 
-## Contributing
+1. **Browser-based Screenshot Generator**
+   - Use Playwright or Selenium
+   - Capture real browser rendering
+   - Handle JavaScript-heavy pages
 
-We welcome contributions! Please follow these steps:
+2. **Image Processing Generator**
+   - Use ImageMagick or similar libraries
+   - Process and resize existing images
+   - Apply filters and effects
 
-1. **Fork** the repository
-2. **Create** a feature branch (`git checkout -b feature/amazing-feature`)
-3. **Commit** your changes (`git commit -m 'Add some amazing feature'`)
-4. **Push** to the branch (`git push origin feature/amazing-feature`)
-5. **Open** a Pull Request
+3. **HTML to Image Generator**
+   - Use wkhtmltoimage or similar tools
+   - Convert HTML documents to images
+   - Lightweight alternative to browser automation
 
-### Development Setup
+4. **PDF Thumbnail Generator**
+   - Use Apache PDFBox or similar
+   - Generate thumbnails from PDF documents
+   - Extract first page or specific pages
 
-```bash
-# Clone your fork
-git clone https://github.com/YOUR_USERNAME/fess-thumbnail-playwright.git
-cd fess-thumbnail-playwright
+## Related Projects
 
-# Install dependencies (required for first-time setup)
-git clone https://github.com/codelibs/fess-parent.git
-cd fess-parent
-mvn install -Dgpg.skip=true
-cd ../fess-thumbnail-playwright
-
-# Build and test
-mvn clean compile
-mvn test
-```
-
-### Code Style
-
-The project uses automated code formatting. Format your code before committing:
-
-```bash
-mvn formatter:format
-```
+- [Fess](https://github.com/codelibs/fess) - Full-text search server
+- [Fess Thumbnail Playwright](https://github.com/codelibs/fess-thumbnail-playwright) - Playwright-based thumbnail generator
 
 ## License
 
 This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
 
-## Issues and Support
+## Contributing
 
-- **Bug Reports**: Please use the [GitHub Issues](https://github.com/codelibs/fess-thumbnail-playwright/issues) page
-- **Feature Requests**: Submit them as GitHub Issues with the "enhancement" label
-- **Questions**: Use [Discussions](https://discuss.codelibs.org/c/fessen/) for general questions
+We welcome contributions! Please follow these steps:
 
-## Related Projects
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Open a Pull Request
 
-- [Fess](https://github.com/codelibs/fess) - Full-text search server
-- [Microsoft Playwright](https://github.com/microsoft/playwright-java) - Browser automation library
+## Support
 
+- **Issues**: Report bugs or request features at [GitHub Issues](https://github.com/codelibs/fess-thumbnail-example/issues)
+- **Discussions**: Ask questions at [Fess Discussion Forum](https://discuss.codelibs.org/c/fessen/)
+- **Documentation**: Visit [Fess Documentation](https://fess.codelibs.org/documentation.html)

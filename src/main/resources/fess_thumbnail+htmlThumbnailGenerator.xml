@@ -3,15 +3,9 @@
 	"http://dbflute.org/meta/lastadi10.dtd">
 <components>
 	<component name="htmlThumbnailGenerator"
-		class="org.codelibs.fess.thumbnail.playwright.PlaywrightThumbnailGenerator">
+		class="org.codelibs.fess.thumbnail.example.ExampleThumbnailGenerator">
 		<property name="name">"htmlThumbnailGenerator"</property>
-		<property name="launchOptions">
-			<component
-				class="com.microsoft.playwright.BrowserType$LaunchOptions"
-				instance="prototype">
-				<property name="headless">true</property>
-			</component>
-		</property>
+		<!-- Add your custom properties here -->
 		<postConstruct name="addCondition">
 			<arg>"mimetype"</arg>
 			<arg>"text/html"</arg>
