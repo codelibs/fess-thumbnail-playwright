@@ -25,20 +25,15 @@ import javax.imageio.ImageIO;
 
 import org.codelibs.fess.helper.SystemHelper;
 import org.codelibs.fess.util.ComponentUtil;
-import org.dbflute.utflute.lastaflute.LastaFluteTestCase;
+import org.junit.jupiter.api.TestInfo;
 
 import com.microsoft.playwright.Browser;
 import com.microsoft.playwright.BrowserType;
 import com.microsoft.playwright.options.LoadState;
 
-public class PlaywrightThumbnailGeneratorTest extends LastaFluteTestCase {
+public class PlaywrightThumbnailGeneratorTest extends UnitTestCase {
 
     private PlaywrightThumbnailGenerator generator;
-
-    @Override
-    protected String prepareConfigFile() {
-        return "test_app.xml";
-    }
 
     @Override
     protected boolean isSuppressTestCaseTransaction() {
@@ -46,8 +41,8 @@ public class PlaywrightThumbnailGeneratorTest extends LastaFluteTestCase {
     }
 
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         generator = new PlaywrightThumbnailGenerator() {
             @Override
             protected void updateProperties() {
@@ -62,10 +57,10 @@ public class PlaywrightThumbnailGeneratorTest extends LastaFluteTestCase {
     }
 
     @Override
-    public void tearDown() throws Exception {
+    protected void tearDown(TestInfo testInfo) throws Exception {
         generator.destroy();
         ComponentUtil.setFessConfig(null);
-        super.tearDown();
+        super.tearDown(testInfo);
     }
 
     public void test_createScreenshot() throws IOException {
