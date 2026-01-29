@@ -15,25 +15,18 @@
  */
 package org.codelibs.fess.crawler.transformer;
 
-import java.io.ByteArrayInputStream;
-import java.util.Date;
-
 import org.codelibs.fess.crawler.entity.ResponseData;
-import org.dbflute.utflute.lastaflute.LastaFluteTestCase;
+import org.codelibs.fess.thumbnail.playwright.UnitTestCase;
+import org.junit.jupiter.api.TestInfo;
 import org.w3c.dom.Document;
 
 /**
  * Comprehensive test cases for CustomFessXpathTransformer using Ultrathink approach.
  * Tests cover edge cases, error conditions, and various MIME type scenarios.
  */
-public class CustomFessXpathTransformerTest extends LastaFluteTestCase {
+public class CustomFessXpathTransformerTest extends UnitTestCase {
 
     private CustomFessXpathTransformer transformer;
-
-    @Override
-    protected String prepareConfigFile() {
-        return "test_app.xml";
-    }
 
     @Override
     protected boolean isSuppressTestCaseTransaction() {
@@ -41,8 +34,8 @@ public class CustomFessXpathTransformerTest extends LastaFluteTestCase {
     }
 
     @Override
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp(TestInfo testInfo) throws Exception {
+        super.setUp(testInfo);
         transformer = new CustomFessXpathTransformer();
     }
 
