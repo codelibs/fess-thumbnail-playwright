@@ -24,6 +24,23 @@ A powerful thumbnail generation plugin for [Fess](https://fess.codelibs.org/) th
 
 ## Installation
 
+From Fess 15.9 the distribution no longer bundles Playwright. This plugin is self-contained: it
+carries the Playwright API and its JS driver, so it does not need `fess-crawler-playwright`
+(installing both is fine as long as they come from the same Fess release, because both carry the
+same Playwright). What it leaves out is the Node.js binary that runs the driver:
+
+```
+$ bin/fess-setup install plugin fess-thumbnail-playwright
+$ bin/fess-setup install nodejs
+```
+
+`bin/fess.in.sh` finds an installed Node.js and sets `PLAYWRIGHT_NODEJS_PATH`, which the thumbnail
+job inherits; point that variable at your own Node.js (20 or later) if you would rather not install
+one here. Browsers are separate again, and Playwright downloads them on first use. Restart Fess
+afterwards: the components this plugin contributes are read when the DI container is built.
+
+Or install the jar by hand:
+
 ### Method 1: Using Maven Central (Recommended)
 
 1. Download the latest JAR from [Maven Central](https://repo1.maven.org/maven2/org/codelibs/fess/fess-thumbnail-playwright/)
