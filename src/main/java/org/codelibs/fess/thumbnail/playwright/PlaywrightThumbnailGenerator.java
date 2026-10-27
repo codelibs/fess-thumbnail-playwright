@@ -150,8 +150,37 @@ public class PlaywrightThumbnailGenerator extends BaseThumbnailGenerator {
                 logger.debug("Failed to create Playwright instance.", e);
             }
             close(playwright, browser, browserContext, page);
-            throw new CrawlerSystemException("Failed to create PlaywrightThumbnailGenerator.", e);
+            throw new CrawlerSystemException("Failed to create PlaywrightThumbnailGenerator." + (playwright == null ? nodeJsHint(e) : ""),
+                    e);
         }
+    }
+
+    /**
+     * Tells how to install Node.js when Playwright could not start because it has none, or because
+     * {@code PLAYWRIGHT_NODEJS_PATH} points at a file that does not exist.
+     *
+     * <p>Playwright's own message suggests adding the {@code driver-bundle} dependency, which a Fess user
+     * cannot act on: this generator is a plugin and Node.js is installed with {@code bin/fess-setup}.</p>
+     *
+     * @param e The failure of {@link Playwright#create}.
+     * @return The hint to append to the failure message, or an empty string if Node.js is not the cause.
+     */
+    protected static String nodeJsHint(final Throwable e) {
+        for (Throwable t = e; t != null; t = t.getCause()) {
+            final String message = t.getMessage();
+            if (message == null) {
+                continue;
+            }
+            if (message.contains("bundled Node.js")) {
+                return " Node.js was not found. Install it with bin/fess-setup install nodejs and restart Fess,"
+                        + " or set the PLAYWRIGHT_NODEJS_PATH environment variable to a Node.js binary.";
+            }
+            if (message.contains("Invalid Node.js path")) {
+                return " Check that the PLAYWRIGHT_NODEJS_PATH environment variable points to an existing Node.js binary,"
+                        + " or unset it and install Node.js with bin/fess-setup install nodejs and restart Fess.";
+            }
+        }
+        return "";
     }
 
     /**
